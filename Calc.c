@@ -39,30 +39,37 @@ int main(){
         printf("错误：q1无解，参数超出范围\n");
         return 1;
     }
-    double q1 = -atan2(Y_B, X_B) + acos(arg_q1);
+    Arm_params.q[0] = -atan2(Y_B, X_B) + acos(arg_q1);
     // q1 = fmod(q1 + 2*PI, 2*PI);    // 归一化到 [0, 2π)
     // if (q1 > PI) q1 -= 2*PI;       // 映射到 [-π, π]
-    q1 = clamp(q1, 0.0, PI);       // 限制在 [0, π]
+    Arm_params.q[0] = clamp(Arm_params.q[0], 0.0, PI);       // 限制在 [0, π]
 
     // 计算 q2 -------------------------------------------------
     double arg_q2 = (Arm_params.L1 * Arm_params.L1 + Arm_params.L2 * Arm_params.L2 - R*R) / (2 * Arm_params.L1 * Arm_params.L2);
     if (fabs(arg_q2) > 1.0) {
         printf("错误：q2无解，参数超出范围\n");
-        return 1;
+        return 2;
     }
-    double q2 = acos(arg_q2) - Arm_params.theta2;
-    q2 = clamp(q2, 0.0, PI);       // 限制在 [0, π]
+    Arm_params.q[1] = acos(arg_q2) - Arm_params.theta2;
+    Arm_params.q[1] = clamp(Arm_params.q[1], 0.0, PI);       // 限制在 [0, π]
 
     // 计算 q3 -------------------------------------------------
-    double q3 = target - q2 - Arm_params.theta2 + q1 + Arm_params.theta3;
-    q3 = clamp(q3, -1.66, 1.66);   // 限制在 [-1.66, 1.66]
+    Arm_params.q[3] = target - Arm_params.q[1] - Arm_params.theta2 + Arm_params.q[0] + Arm_params.theta3;
+    Arm_params.q[3] = clamp(Arm_params.q[3], -1.66, 1.66);   // 限制在 [-1.66, 1.66]
 
-    //运行正运动学求解进行比较判断逆解正确性
+    // //运行正运动学求解进行比较判断逆解正确性
+    // Arm_params.B_resume[0] = Arm_params.L1*cos(PI-Arm_params.q[0])+Arm_params.L2*cos(Arm_params.q[2]+Arm_params.theta2-Arm_params.q[1]);
+    // Arm_params.B_resume[1] = Arm_params.L1*sin(PI-Arm_params.q[0])+Arm_params.L2*sin(Arm_params.q[2]+Arm_params.theta2-Arm_params.q[1]);
+    // // if(fabs(Arm_params.B_resume[0]-Arm_params.B[0]) > 0.01 || fabs(Arm_params.B_resume[1]-Arm_params.B[1]) > 0.01)
+    // // {
+    // //     printf("错误：逆解误差过大");
+    // //     return 3;
+    // // }
 
     // 输出结果
-    printf("q1 = %.4f rad (%.2f°)\n", q1, q1*180/PI);
-    printf("q2 = %.4f rad (%.2f°)\n", q2, q2*180/PI);
-    printf("q3 = %.4f rad (%.2f°)\n", q3, q3*180/PI);
+    printf("q1 = %.4f rad (%.2f°)\n", Arm_params.q[0], Arm_params.q[0]*180/PI);
+    printf("q2 = %.4f rad (%.2f°)\n", Arm_params.q[1], Arm_params.q[1]*180/PI);
+    printf("q3 = %.4f rad (%.2f°)\n", Arm_params.q[3], Arm_params.q[3]*180/PI);
 
     return 0;
 

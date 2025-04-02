@@ -11,7 +11,7 @@ typedef struct Arm_Params_t
     double theta3; // Joint angle 3
 
     double q[3];
-    double p[3];
+    double B_resume[2];
     double B[2];
     double target;
 }Arm_Params_t;
